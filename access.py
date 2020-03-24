@@ -85,6 +85,7 @@ class Connection:
                 sql = "select " + select + " from " + fr
             else:
                 sql = "select " + select + " from " + fr + " where " + where
+                
             self.cursor.execute(sql)
 
             return self.cursor.fetchall()

@@ -5,27 +5,48 @@ import discord
 from dotenv import load_dotenv
 import threading
 from Tutor import Tutor
+from datetime import datetime
 
 # this code starts a separate threads that updates the current tutors every 15 minuntes
-availableTutorQueue = [] # a list of tutors available to tutor at the moment
 currentTutors = []
 studentQueue = [] # students who are queued up to be tutored
+# maps the tutorDiscordID to the student and start time of the session
+currentTutoringDict = dict()
+
 def updateTutors():
-    currentTutors = Tutor.getCurrentTutors()
-    print(currentTutors)
-    threading.Timer(15*60, updateTutors).start()
+    global currentTutors
+    tutors = Tutor.getCurrentTutors()
+    for tutor in tutors:
+        if tutor not in currentTutors:
+            if tutor not in currentTutoringDict:
+                currentTutors.append(tutor)
+    for i, tutor in enumerate(currentTutors):
+        if tutor not in tutors:
+            currentTutors.pop(i)
+    
+    threading.Timer(1, updateTutors).start()
 threading.Thread(target=updateTutors).start()
+
+
 
 # every thirty seconds this function will run and check if a tutor is available and if there is a student that needs help
 def updateQueues():
     print(currentTutors)
     print(studentQueue)
+    print(currentTutoringDict)
 
-    if len(studentQueue) > 0 and len(availableTutorQueue) > 0:
-        currentTutors.pop(0)
-        studentQueue.pop(0)
-        # make a chatroom and stuff
+    if len(studentQueue) > 0 and len(currentTutors) > 0:
+        print('hahah')
+        tutor = currentTutors.pop(0)
+        student = studentQueue.pop(0)
+        # datetime object containing current date and time
+        now = datetime.now()
         
+        currentTime = f'{now.hour}:{now.minute}:{now.second}'
+
+        currentTutoringDict[tutor] = (student, currentTime)
+        # make a chatroom and stuff
+
     threading.Timer(1, updateQueues).start()
 threading.Thread(target=updateQueues).start()
 
@@ -74,5 +95,14 @@ async def tutor_me(ctx):
 
     response = f'Hello {ctx.message.author.mention}, you are scheduled for tutoring and a tutor will be with you shortly!'
     await ctx.send(response)
+
+@bot.command(name='freetutor', help='Makes the tutor available and ends the session')
+async def free_tutor(ctx):
+    # make sure it is a tutor using the command
+    discordID = f'{ctx.message.author.name}#{ctx.message.author.discriminator}'
+    # put info in db
+    del currentTutoringDict[discordID]
+    #response = f'Hello {ctx.message.author.mention}, you are scheduled for tutoring and a tutor will be with you shortly!'
+    #await ctx.send(response)
 
 bot.run(TOKEN)

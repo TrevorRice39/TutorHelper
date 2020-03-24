@@ -24,7 +24,6 @@ class Tutor:
         db_name = os.getenv('DB_NAME')
         con = access.Connection(db_host, db_user, '', db_name, False)
         day = {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'}[datetime.today().weekday()]
-        day = 'Wednesday'
 
         # datetime object containing current date and time
         now = datetime.now()
@@ -33,7 +32,7 @@ class Tutor:
 
         ret = []
         tutors = con.select("discordID", "TutoringTimeSlots", f"startTime <= '{currentTime}' and endTime >= '{currentTime}' and day = '{day}'")
-
+        
         for entry in tutors:
             ret.append(entry[0]) 
         return ret
