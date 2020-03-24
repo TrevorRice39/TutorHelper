@@ -36,6 +36,20 @@ class Tutor:
         for entry in tutors:
             ret.append(entry[0]) 
         return ret
+    def getAllTutors():
+        load_dotenv()
+        db_host = os.getenv('DB_HOST')
+        db_user = os.getenv('DB_USER')
+        db_pw = os.getenv('DB_PW')
+        db_name = os.getenv('DB_NAME')
+        con = access.Connection(db_host, db_user, '', db_name, False)
+
+        ret = []
+        tutors = con.select("discordID", "Tutor", "")
+        
+        for entry in tutors:
+            ret.append(entry[0]) 
+        return ret
 
     
     
