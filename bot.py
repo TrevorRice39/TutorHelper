@@ -177,8 +177,9 @@ async def free_tutor(ctx):
         student = currentTutoringDict[discordID][0]
 
         ret = []
-        insertVals = [discordID, currentTutoringDict[discordID][1], currentTime, student, currentTutoringDict[discordID][2]]
-        con.insert("TutoringLogs", 'discordID, startTime, endTime, studentDiscordID, classTutored', insertVals)
+        day = {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'}[datetime.today().weekday()]
+        insertVals = [discordID, currentTutoringDict[discordID][1], currentTime, day, student, currentTutoringDict[discordID][2]]
+        con.insert("TutoringLogs", 'discordID, startTime, endTime, DAY, studentDiscordID, classTutored', insertVals)
         
         bot.loop.create_task(sendDM(student, f'Hello {memberDict[student].mention}, your tutoring session has ended.'))
         bot.loop.create_task(sendDM(discordID, f'Your tutoring session has ended.'))
