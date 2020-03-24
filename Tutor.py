@@ -16,7 +16,7 @@ class Tutor:
         return f'{self.firstName} {self.lastName}'
 
 
-    def getCurrentTutors(time):
+    def getCurrentTutors():
         load_dotenv()
         db_host = os.getenv('DB_HOST')
         db_user = os.getenv('DB_USER')

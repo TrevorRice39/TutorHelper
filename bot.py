@@ -3,6 +3,32 @@ import os
 import random
 import discord
 from dotenv import load_dotenv
+import threading
+from Tutor import Tutor
+
+# this code starts a separate threads that updates the current tutors every 15 minuntes
+availableTutorQueue = [] # a list of tutors available to tutor at the moment
+currentTutors = []
+studentQueue = [] # students who are queued up to be tutored
+def updateTutors():
+    currentTutors = Tutor.getCurrentTutors()
+    print(currentTutors)
+    threading.Timer(15*60, updateTutors).start()
+threading.Thread(target=updateTutors).start()
+
+# every thirty seconds this function will run and check if a tutor is available and if there is a student that needs help
+def updateQueues():
+    print(currentTutors)
+    print(studentQueue)
+
+    if len(studentQueue) > 0 and len(availableTutorQueue) > 0:
+        currentTutors.pop(0)
+        studentQueue.pop(0)
+        # make a chatroom and stuff
+        
+    threading.Timer(1, updateQueues).start()
+threading.Thread(target=updateQueues).start()
+
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -37,12 +63,15 @@ async def on_ready():
 async def on_member_join(member):
     await member.create_dm()
     await member.dm_channel.send(
-        f'Hi {member.name}, welcome to the EKU CSC Tutoring server! Look in the info channel for more information!'
+        f'Hi {member.name}, welcome to the EKU CSC Tutoring server! Look in the info channel for more information! If you want help using the tutoring bot type !info'
     )
 
 @bot.command(name='tutorme', help='Schedules a student for tutoring')
 async def tutor_me(ctx):
-    # schedule
+    discordID = f'{ctx.message.author.name}#{ctx.message.author.discriminator}'
+    if discordID not in studentQueue:
+        studentQueue.append(discordID)
+
     response = f'Hello {ctx.message.author.mention}, you are scheduled for tutoring and a tutor will be with you shortly!'
     await ctx.send(response)
 
