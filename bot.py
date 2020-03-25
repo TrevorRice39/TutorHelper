@@ -46,6 +46,12 @@ def updateTutors():
 threading.Thread(target=updateTutors).start()
 bot = commands.Bot(command_prefix='!')
 
+pfp_path = "./hat.png"
+
+fp = open(pfp_path, 'rb')
+pfp = fp.read()
+
+    
 @bot.event
 async def sendDM(userID, message):
     member = memberDict[userID]
@@ -97,6 +103,7 @@ async def help(ctx):
 
 @bot.event
 async def on_ready():
+    # await bot.user.edit(avatar=pfp)
     for guild in bot.guilds:
         if guild.name == GUILD:
             break
