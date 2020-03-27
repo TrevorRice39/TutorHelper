@@ -31,6 +31,8 @@ class Connection:
 
 
     def close_connection(self):
+        self.cursor.close()
+        self.database.close()
         return
     def createDatabase(self, databasename):
         """
