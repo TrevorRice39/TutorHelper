@@ -15,4 +15,4 @@ class Student:
         return self.assignmentDescription
 
     def __str__(self):
-        return self.getDiscordID
+        return self.discordID

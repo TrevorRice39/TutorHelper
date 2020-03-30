@@ -47,8 +47,7 @@ def updateTutors():
     for i, tutor in enumerate(currentTutors):
         if tutor not in tutors:
             currentTutors.pop(i) # remove them
-    print(currentTutors)
-    threading.Timer(60, updateTutors).start() # update every 60 seconds
+    threading.Timer(20, updateTutors).start() # update every 60 seconds
 threading.Thread(target=updateTutors).start()
 bot = commands.Bot(command_prefix='!')
 
@@ -95,8 +94,15 @@ is available and if there is a student that needs help
         initiates tutoring session
 '''
 async def updateQueues() -> None:
-    print('students ', studentQueue)
-    print(currentTutoringDict)
+    print('Tutors:')
+    for tutor in currentTutors:
+        print(tutor)
+    print('\nStudents:')
+    for student in studentQueue:
+        print(student)
+    print('\nTutoring Dict:')
+    for tutor in currentTutoringDict:
+        print(f'tutor: {tutor} -> student: {str(currentTutoringDict[tutor])}.')
 
 
     if studentsAvailable() and tutorAvailable():
@@ -104,8 +110,15 @@ async def updateQueues() -> None:
         studentObject = studentQueue.pop(0) # get the first student in queue
         studentID = studentObject.getDiscordID() # get their id
         
+        message = ""
+    
+        if memberDict[studentID].nick is not None:
+                message = f'ID: {studentID} {memberDict[studentID].nick} is waiting on your assistance!\nCourse: {studentObject.getCourse()}\nDescription: {studentObject.getAssignmentDescription()}'
+        else:
+            message = f'{memberDict[studentID].mention} ID: {studentID} is waiting on your assistance!\nCourse: {studentObject.getCourse()}\nDescription: {studentObject.getAssignmentDescription()}'
+        #message = f'{memberDict[studentID].mention} is waiting on your assistance!\nCourse: {studentObject.getCourse()}\nDescription: {studentObject.getAssignmentDescription()}'
         # tell the tutor they have a student waiting for their help
-        bot.loop.create_task(sendDM(tutor, f'{memberDict[studentID].mention} is waiting on your assistance!\nCourse: {studentObject.getCourse()}\nDescription: {studentObject.getAssignmentDescription()}'))
+        bot.loop.create_task(sendDM(tutor, message))
         
         # tell the student who is going to help them
         bot.loop.create_task(sendDM(studentID, f'Hello {memberDict[studentID].mention}, {memberDict[tutor].mention} will contact you to help you!'))
@@ -119,7 +132,7 @@ async def updateQueues() -> None:
         currentTutoringDict[tutor] = (studentID, currentTime, studentObject.getCourse())
     
     # sleep for one second
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
 
     # make a new task of the update queues
     bot.loop.create_task(updateQueues())
@@ -163,6 +176,7 @@ Bot event that is called when a new member joins
 '''
 @bot.event
 async def on_member_join(member):
+    print('member joined')
     # role = discord.utils.get(after.server.roles, name="student")
     # await bot.add_roles(member, role)
 
@@ -305,4 +319,4 @@ bot.loop.create_task(updateQueues())
 bot.run(TOKEN)
 
 # close the db connection
-con.close()
+con.close_connection()

@@ -13,7 +13,7 @@ class Tutor:
 
 
     def __str__ (self):
-        return f'{self.firstName} {self.lastName}'
+        return f'{self.firstName} {self.lastName}: {self.discordID}'
 
 
     def getCurrentTutors():
