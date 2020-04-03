@@ -10,7 +10,7 @@ import asyncio
 import access
 from Student import Student
 from discord.ext import commands
-
+import time
 
 # dictionary of id's to member objects
 memberDict = dict()
@@ -27,6 +27,9 @@ db_pw = os.getenv('DB_PW')
 db_name = os.getenv('DB_NAME')
 con = access.Connection(db_host, db_user, '', db_name, False)
 
+# dictionary to keep track of students tutors have passed on
+# student id: list of tutor ids
+tutorPassDict = dict()
 
 
 # this code starts a separate threads that updates the current tutors every 15 minuntes
@@ -106,10 +109,17 @@ async def updateQueues() -> None:
 
 
     if studentsAvailable() and tutorAvailable():
-        tutor = currentTutors.pop(0) # get the first tutor
-        studentObject = studentQueue.pop(0) # get the first student in queue
-        studentID = studentObject.getDiscordID() # get their id
+        tutor = currentTutors[0] # get the first tutor
+        studentObject = studentQueue[0] # get the first student in queue
+        studentID = studentObject.getDiscordID()
+        if studentID in tutorPassDict:
+            passList = tutorPassDict[studentID][0]
+            if tutor in passList:
+                return
+         # get their id
         
+        currentTutors.pop(0)
+        studentQueue.pop(0)
         message = ""
     
         if memberDict[studentID].nick is not None:
@@ -129,13 +139,13 @@ async def updateQueues() -> None:
 
         # add an entry to the dict with the studentID, currentTime, and course so
         # it can be added to the database later
-        currentTutoringDict[tutor] = (studentID, currentTime, studentObject.getCourse())
+        currentTutoringDict[tutor] = (studentID, currentTime, studentObject.getCourse(), studentObject.getAssignmentDescription())
     
     # sleep for one second
-    await asyncio.sleep(2)
+    #await asyncio.sleep(2)
 
     # make a new task of the update queues
-    bot.loop.create_task(updateQueues())
+    #bot.loop.create_task(updateQueues())
 
 
 '''
@@ -288,7 +298,7 @@ Bot command that cancels a tutoring sessions
 @bot.command(name='canceltutor', help="Cancels the session a student signed up for")
 async def cancel_tutor(ctx):
 
-      # get their discord id
+    # get their discord id
     studentID = f'{ctx.message.author.name}#{ctx.message.author.discriminator}'
     if removeStudentInQueue(studentID):
         await ctx.message.author.create_dm()
@@ -320,6 +330,50 @@ async def add_me(ctx, fName, lName):
     await ctx.message.author.dm_channel.send(
         f'Hello {ctx.message.author.mention}, you have been added!'
     )
+
+'''
+Function to remove the student and tutor from the temporary pass
+dictionary
+'''
+async def update_pass_timer() -> None:
+    for studentID in tutorPassDict:
+        passList = tutorPassDict[studentID]
+        for index, tutorTuple in enumerate(passList):
+            tutorID, time = tutorTuple
+            if time <= 0:
+                tutorPassDict[studentID].pop(index)
+                if len(tutorPassDict[studentID]) == 0:
+                    del tutorPassDict[studentID]
+                    bot.loop.create_task(update_pass_timer())
+                    bot.loop.create_task(updateQueues())
+                    return     
+            else:
+                tutorPassDict[studentID][index] = (tutorID, time - 1)
+    await asyncio.sleep(1)
+    bot.loop.create_task(update_pass_timer())
+    bot.loop.create_task(updateQueues())
+@bot.command(name='pass', help="Passes a student to another tutor")
+async def pass_tutor(ctx):
+    discordID = f'{ctx.message.author.name}#{ctx.message.author.discriminator}'
+    if discordID in currentTutoringDict:
+        studentID = currentTutoringDict[discordID][0]
+        if studentID not in tutorPassDict:
+            tutorPassDict[studentID] = list()
+        
+        tutorPassDict[studentID].append((discordID, 15))
+
+        classArg = currentTutoringDict[discordID][2]
+        description = currentTutoringDict[discordID][3]
+        student = Student(studentID, classArg, description)
+        #threading.Thread(target=pass_timer, args=[studentID, discordID]).start()
+        #bot.loop.create_task(pass_timer(studentID, discordID))
+        del currentTutoringDict[discordID]
+        studentQueue.append(student)
+        # tell them they are added
+        await ctx.message.author.create_dm()
+        await ctx.message.author.dm_channel.send(
+            f'This student will be passed to another tutor.'
+        )
 
 
 '''
@@ -353,6 +407,7 @@ async def free_tutor(ctx) -> None:
         # remove the session from the dictionary
         del currentTutoringDict[discordID]
 
+bot.loop.create_task(update_pass_timer())
 # start updating queues
 bot.loop.create_task(updateQueues())
 
