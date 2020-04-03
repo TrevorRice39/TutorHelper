@@ -47,7 +47,7 @@ def updateTutors():
     for i, tutor in enumerate(currentTutors):
         if tutor not in tutors:
             currentTutors.pop(i) # remove them
-    threading.Timer(20, updateTutors).start() # update every 60 seconds
+    threading.Timer(1, updateTutors).start() # update every 60 seconds
 threading.Thread(target=updateTutors).start()
 bot = commands.Bot(command_prefix='!')
 
@@ -217,6 +217,17 @@ def studentInQueue(studentID: str) -> bool:
     # if they are not in queue, nor in tutoring, return false
     return False
 
+def removeStudentInQueue(studentID: str) -> bool:
+    # loop through students in queue
+    for i, student in enumerate(studentQueue):
+        # if we find them return true
+       
+        actualid = student.getDiscordID()
+        if actualid == studentID:
+            studentQueue.pop(i)
+            return True
+    # if they are not in queue, nor in tutoring, return false
+    return False
 
 '''
 Bot command that allows a student to be put in queue for tutoring
@@ -245,6 +256,14 @@ async def tutor_me(ctx, *, arguments: str) -> None:
     # check if they are in queue
     if studentInQueue(discordID) == False: # they aren't in queue
         # make a new student object and put them in queue
+        if not tutorAvailable() and len(currentTutoringDict) == 0:
+            await ctx.message.author.create_dm()
+            await ctx.message.author.dm_channel.send(
+                f'Hi {ctx.message.author.mention}, no tutors are currently available. Please check at https://computerscience.eku.edu/tutoring-schedule for our available times. You are in queue for tutoring but it could be a while before a tutor gets to you. You can stay in queue or type !cancel to leave.'
+            )
+            s = Student(discordID, classArg, description)
+            studentQueue.append(s)
+            return
         s = Student(discordID, classArg, description)
         studentQueue.append(s)
     else: # they are being tutored or in queue
@@ -260,6 +279,27 @@ async def tutor_me(ctx, *, arguments: str) -> None:
     await ctx.message.author.dm_channel.send(
         f'Hi {ctx.message.author.mention}, please wait until a tutor becomes available and they will message you.'
     )
+
+
+'''
+Bot command that cancels a tutoring sessions
+
+'''
+@bot.command(name='canceltutor', help="Cancels the session a student signed up for")
+async def cancel_tutor(ctx):
+
+      # get their discord id
+    studentID = f'{ctx.message.author.name}#{ctx.message.author.discriminator}'
+    if removeStudentInQueue(studentID):
+        await ctx.message.author.create_dm()
+        await ctx.message.author.dm_channel.send(
+            f'Hello {ctx.message.author.mention}, your tutoring session has been canceled!'
+        )
+    else:
+        await ctx.message.author.create_dm()
+        await ctx.message.author.dm_channel.send(
+            f'Sorry {ctx.message.author.mention}, something went wrong when trying to cancel!'
+        )
 
 '''
 Bot command that adds a student to the database
@@ -280,6 +320,7 @@ async def add_me(ctx, fName, lName):
     await ctx.message.author.dm_channel.send(
         f'Hello {ctx.message.author.mention}, you have been added!'
     )
+
 
 '''
 Bot command that allows the tutor to end their current session
