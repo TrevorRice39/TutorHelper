@@ -27,9 +27,6 @@ db_host = os.environ.get('DB_HOST')
 db_user = os.environ.get('DB_USER')
 db_pw = os.environ.get('DB_PW')
 db_name = os.environ.get('DB_NAME')
-print(db_host)
-print(db_user)
-print(db_pw)
 con = access.Connection(db_host, db_user, db_pw, db_name, False)
 
 # dictionary to keep track of students tutors have passed on
@@ -104,17 +101,6 @@ is available and if there is a student that needs help
         initiates tutoring session
 '''
 async def updateQueues() -> None:
-    print('Tutors:')
-    for tutor in currentTutors:
-        print(tutor)
-    print('\nStudents:')
-    for student in studentQueue:
-        print(student)
-    print('\nTutoring Dict:')
-    for tutor in currentTutoringDict:
-        print(f'tutor: {tutor} -> student: {str(currentTutoringDict[tutor])}.')
-
-
     if studentsAvailable() and tutorAvailable():
         tutor = currentTutors[0] # get the first tutor
         studentObject = studentQueue[0] # get the first student in queue
@@ -174,7 +160,6 @@ Bot event that is called when the bot initially starts
 '''
 @bot.event
 async def on_ready():
-    print('here')
     # commented out avatar update
     # await bot.user.edit(avatar=pfp)
 
@@ -187,13 +172,11 @@ async def on_ready():
             if member not in memberDict:
                 # maps memberID to member
                 memberDict[str(member)] = member
-        print(guild.members)
 '''
 Bot event that is called when a new member joins
 '''
 @bot.event
 async def on_member_join(member):
-    print('member joined')
     # role = discord.utils.get(after.server.roles, name="student")
     # await bot.add_roles(member, role)
 
