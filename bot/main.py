@@ -1,4 +1,4 @@
-
+#!/usr/bin/python
 # bot.py
 import os
 import random
