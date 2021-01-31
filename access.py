@@ -21,10 +21,12 @@ class Connection:
         self.user = user
         self.passwd = passwd
         self.databasename = database
+        print(self.passwd)
         if (newdatabase): # checks if you wish to create a new database
             self.database = MySQLdb.connect(host=self.host,user=self.user,passwd=self.passwd)
         else:
             self.database = MySQLdb.connect(host=self.host,user=self.user,passwd=self.passwd, database=self.databasename)
+        print('got here')
         self.cursor = self.database.cursor()
         self.createDatabase(self.databasename)
         self.cursor.execute('use ' + self.databasename)

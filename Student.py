@@ -1,7 +1,6 @@
 
 class Student:
 
-
     def __init__(self, discordID, course, assignmentDescription):
         self.discordID = discordID
         self.course = course

@@ -1,3 +1,4 @@
+
 # bot.py
 import os
 import random
@@ -25,7 +26,10 @@ db_host = os.getenv('DB_HOST')
 db_user = os.getenv('DB_USER')
 db_pw = os.getenv('DB_PW')
 db_name = os.getenv('DB_NAME')
-con = access.Connection(db_host, db_user, '', db_name, False)
+print(db_host)
+print(db_user)
+print(db_pw)
+con = access.Connection(db_host, db_user, db_pw, db_name, False)
 
 # dictionary to keep track of students tutors have passed on
 # student id: list of tutor ids
@@ -52,7 +56,10 @@ def updateTutors():
             currentTutors.pop(i) # remove them
     threading.Timer(1, updateTutors).start() # update every 60 seconds
 threading.Thread(target=updateTutors).start()
-bot = commands.Bot(command_prefix='!')
+
+intents = discord.Intents.all()
+
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 pfp_path = "./hat.png"
 
@@ -62,7 +69,6 @@ pfp = fp.read()
     
 '''
 Helper function that allows the bot to direct message a user
-
 @param userID - discord id of the user the message will be sent to
 @param message - the message text
 @return None
@@ -167,20 +173,20 @@ Bot event that is called when the bot initially starts
 '''
 @bot.event
 async def on_ready():
+    print('here')
     # commented out avatar update
     # await bot.user.edit(avatar=pfp)
 
     # when we find the guild we're currently in
     for guild in bot.guilds:
-        if guild.name == GUILD:
-            break
+        
 
     # build member dictionary
         for member in guild.members:
             if member not in memberDict:
                 # maps memberID to member
                 memberDict[str(member)] = member
-
+        print(guild.members)
 '''
 Bot event that is called when a new member joins
 '''
@@ -293,7 +299,6 @@ async def tutor_me(ctx, *, arguments: str) -> None:
 
 '''
 Bot command that cancels a tutoring sessions
-
 '''
 @bot.command(name='canceltutor', help="Cancels the session a student signed up for")
 async def cancel_tutor(ctx):
