@@ -13,19 +13,20 @@ from Student import Student
 from discord.ext import commands
 import time
 
+
 # dictionary of id's to member objects
 memberDict = dict()
 loop = asyncio.new_event_loop()
 
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+TOKEN = os.environ.get('DISCORD_TOKEN')
+GUILD = os.environ.get('DISCORD_GUILD')
 
-db_host = os.getenv('DB_HOST')
-db_user = os.getenv('DB_USER')
-db_pw = os.getenv('DB_PW')
-db_name = os.getenv('DB_NAME')
+db_host = os.environ.get('DB_HOST')
+db_user = os.environ.get('DB_USER')
+db_pw = os.environ.get('DB_PW')
+db_name = os.environ.get('DB_NAME')
 print(db_host)
 print(db_user)
 print(db_pw)

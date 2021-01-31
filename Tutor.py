@@ -10,10 +10,10 @@ class Tutor:
 
     def getCurrentTutors():
         load_dotenv()
-        db_host = os.getenv('DB_HOST')
-        db_user = os.getenv('DB_USER')
-        db_pw = os.getenv('DB_PW')
-        db_name = os.getenv('DB_NAME')
+        db_host = os.environ.get('DB_HOST')
+        db_user = os.environ.get('DB_USER')
+        db_pw = os.environ.get('DB_PW')
+        db_name = os.environ.get('DB_NAME')
         con = access.Connection(db_host, db_user, db_pw, db_name, False)
         day = {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'}[datetime.today().weekday()]
         # datetime object containing current date and time
@@ -31,10 +31,10 @@ class Tutor:
 
     def getAllTutors():
         load_dotenv()
-        db_host = os.getenv('DB_HOST')
-        db_user = os.getenv('DB_USER')
-        db_pw = os.getenv('DB_PW')
-        db_name = os.getenv('DB_NAME')
+        db_host = os.environ.get('DB_HOST')
+        db_user = os.environ.get('DB_USER')
+        db_pw = os.environ.get('DB_PW')
+        db_name = os.environ.get('DB_NAME')
         con = access.Connection(db_host, db_user, db_pw, db_name, False)
 
         ret = []
